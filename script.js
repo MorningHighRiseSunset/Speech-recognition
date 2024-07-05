@@ -106,7 +106,7 @@ const generateWord = (optionValue) => {
   userInputSection.innerHTML = displayItem;
 };
 
-//Initial Function (Called when page loads/user presses new game)
+// Modify the initializer function to include speech recognition for each spoken letter
 const initializer = () => {
   winCount = 0;
   count = 0;
@@ -130,7 +130,21 @@ const initializer = () => {
   displayOptions();
   let { initialDrawing } = canvasCreator();
   initialDrawing();
+
+  // Speech recognition for each spoken letter
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'en-US'; // Set the language for recognition
+
+  recognition.onresult = function(event) {
+    const spokenLetter = event.results[0][0].transcript.trim().toUpperCase();
+    if (/^[A-Z]$/.test(spokenLetter)) { // Check if the spoken input is a letter
+      simulateLetterKeyPress(spokenLetter);
+    }
+  };
+
+  recognition.start();
 };
+
 // Letter button click handler
 function letterButtonClickHandler() {
   let charArray = chosenWord.split("");
@@ -343,46 +357,6 @@ document.addEventListener('keydown', function(event) {
     solveWord(); // Solve the game
   }
 });
-
-// Function to handle speech input
-function handleSpeechInput(spokenLetter) {
-  // Call your existing logic with the guessed letter from speech input
-  if (/^[A-Z]$/.test(spokenLetter)) {
-    if (!this.disabled) {
-      letterButtonClickHandler.call({ innerText: spokenLetter });
-    }
-  }
-}
-
-// Function to start speech recognition
-function startSpeechRecognition() {
-  recognition.start();
-}
-
-// Function to stop speech recognition
-function stopSpeechRecognition() {
-  recognition.stop();
-}
-
-// Event listener for mic button click to start speech recognition
-micButton.addEventListener("click", startSpeechRecognition);
-
-// Event listener for stop button click to stop speech recognition
-stopButton.addEventListener("click", stopSpeechRecognition);
-
-// Add speech recognition functionality
-const recognition = new webkitSpeechRecognition();
-recognition.lang = 'en-US';
-recognition.interimResults = false;
-recognition.maxAlternatives = 1;
-
-// Event listener for speech recognition
-recognition.onresult = function(event) {
-  const spokenWord = event.results[0][0].transcript.toUpperCase(); // Get the spoken word
-  if (/^[A-Z]$/.test(spokenWord)) { // Check if the spoken word is a single letter
-    handleSpeechInput(spokenWord);
-  }
-};
 
 // Event listener for keyup
 document.addEventListener('keyup', function(event) {
