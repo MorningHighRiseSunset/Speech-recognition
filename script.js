@@ -106,7 +106,7 @@ const generateWord = (optionValue) => {
   userInputSection.innerHTML = displayItem;
 };
 
-// Modify the initializer function to include speech recognition for each spoken letter
+// Modify the initializer function to include speech recognition for each spoken letter and handle audio connectivity
 const initializer = () => {
   winCount = 0;
   count = 0;
@@ -132,8 +132,21 @@ const initializer = () => {
   initialDrawing();
 
   // Speech recognition for each spoken letter
-  const recognition = new SpeechRecognition();
+  let recognition = new webkitSpeechRecognition() || new SpeechRecognition();
   recognition.lang = 'en-US'; // Set the language for recognition
+
+  recognition.onstart = function() {
+    console.log('Speech recognition started.');
+  };
+
+  recognition.onerror = function(event) {
+    if (event.error === 'no-speech') {
+      alert('No speech detected. Please ensure your microphone is connected and working.');
+    }
+    if (event.error === 'audio-capture') {
+      alert('No microphone detected. Please connect a microphone to use speech recognition.');
+    }
+  };
 
   recognition.onresult = function(event) {
     const spokenLetter = event.results[0][0].transcript.trim().toUpperCase();
